@@ -1,0 +1,109 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Subscription {
+  createdAt           DateTime  @default(now())
+  endDate             DateTime?
+  id                  String    @id @default(cuid())
+  startDate           DateTime?
+  stripeTransactionId String?
+  updatedAt           DateTime  @updatedAt
+  user                User?     @relation(fields: [userId], references: [id])
+  userId              String?
+  video               Video?    @relation(fields: [videoId], references: [id])
+  videoId             String?
+}
+
+model Video {
+  category       String?
+  coach          Coach?                   @relation(fields: [coachId], references: [id])
+  coachId        String?
+  createdAt      DateTime                 @default(now())
+  description    String?
+  encodingStatus EnumVideoEncodingStatus?
+  id             String                   @id @default(cuid())
+  outputUrls     Json?
+  price          Float?
+  subscriptions  Subscription[]
+  thumbnailUrls  Json?
+  title          String?
+  updatedAt      DateTime                 @updatedAt
+  url            String?
+}
+
+model Coach {
+  bio            String?
+  certifications Certification[]
+  createdAt      DateTime        @default(now())
+  id             String          @id @default(cuid())
+  name           String?
+  profilePicture Json?
+  updatedAt      DateTime        @updatedAt
+  videos         Video[]
+}
+
+model User {
+  createdAt     DateTime       @default(now())
+  email         String?        @unique
+  firstName     String?
+  id            String         @id @default(cuid())
+  lastName      String?
+  password      String
+  quizzes       Quiz[]
+  roles         Json
+  subscriptions Subscription[]
+  updatedAt     DateTime       @updatedAt
+  username      String         @unique
+}
+
+model Question {
+  answers   Answer[]
+  createdAt DateTime @default(now())
+  id        String   @id @default(cuid())
+  quiz      Quiz?    @relation(fields: [quizId], references: [id])
+  quizId    String?
+  text      String?
+  updatedAt DateTime @updatedAt
+}
+
+model Quiz {
+  course    String?
+  createdAt DateTime   @default(now())
+  id        String     @id @default(cuid())
+  questions Question[]
+  title     String?
+  updatedAt DateTime   @updatedAt
+  user      User?      @relation(fields: [userId], references: [id])
+  userId    String?
+}
+
+model Certification {
+  coach       Coach?   @relation(fields: [coachId], references: [id])
+  coachId     String?
+  course      String?
+  createdAt   DateTime @default(now())
+  description String?
+  id          String   @id @default(cuid())
+  title       String?
+  updatedAt   DateTime @updatedAt
+}
+
+model Answer {
+  correct    Boolean?
+  createdAt  DateTime  @default(now())
+  id         String    @id @default(cuid())
+  question   Question? @relation(fields: [questionId], references: [id])
+  questionId String?
+  text       String?
+  updatedAt  DateTime  @updatedAt
+}
+
+enum EnumVideoEncodingStatus {
+  Option1
+}
